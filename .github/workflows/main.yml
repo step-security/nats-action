@@ -1,0 +1,21 @@
+name: Test
+on:
+  push:
+    branches:
+      - main
+jobs:
+  test-cluster:
+    runs-on: ubuntu-latest
+    name: Test cluster
+
+    steps:
+      - name: Create Nats server
+        uses: step-security/nats-action@main
+        with:
+          port: "4222 4223 4224"
+
+      - name: connect to server
+        uses: onichandame/nats-client-action@master
+        with:
+          servers: "nats://localhost:4222 nats://localhost:4223 nats://localhost:4224"
+          cluster: "true"
