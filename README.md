@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Create Nats cluster
-        uses: step-security/nats-action@main
+        uses: step-security/nats-action@v0
         with:
           port: "4222 4223 4224" # multiple different ports will start a cluster. single port will start a single server
 
