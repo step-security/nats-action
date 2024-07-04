@@ -30,4 +30,7 @@ usedPorts = usedPorts.concat(ports)
   } catch (e) {
     setFailed(JSON.stringify(e instanceof Error ? e.message : e))
   }
+
+  // see https://github.com/ruby/setup-ruby/issues/543
+  process.exit()
 })()

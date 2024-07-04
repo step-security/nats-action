@@ -37315,6 +37315,8 @@ usedPorts = usedPorts.concat(ports);
     catch (e) {
         (0, core_1.setFailed)(JSON.stringify(e instanceof Error ? e.message : e));
     }
+    // see https://github.com/ruby/setup-ruby/issues/543
+    process.exit();
 }))();
 //# sourceMappingURL=index.js.map
 })();
