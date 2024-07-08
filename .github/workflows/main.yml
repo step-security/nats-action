@@ -9,13 +9,18 @@ jobs:
     name: Test cluster
 
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
+        with:
+          egress-policy: audit
+
       - name: Create Nats server
-        uses: step-security/nats-action@main
+        uses: step-security/nats-action@abe50a6cb93763821d7bea2fda868df278abb104 # main
         with:
           port: "4222 4223 4224"
 
       - name: connect to server
-        uses: onichandame/nats-client-action@master
+        uses: onichandame/nats-client-action@00137e5411d7133e02c7c7a67364f9ae526a96fb # master
         with:
           servers: "nats://localhost:4222 nats://localhost:4223 nats://localhost:4224"
           cluster: "true"
