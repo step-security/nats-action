@@ -9,8 +9,8 @@ const parsePorts = () => {
       getInput("port")
         .split(" ")
         .map(v => parseInt(v, 10))
-        .filter(v => !isNaN(v) && v >= 0),
-    ),
+        .filter(v => !isNaN(v) && v >= 0)
+    )
   ]
 }
 
