@@ -13,7 +13,7 @@ async function validateSubscription(): Promise<void> {
   } catch (error) {
     if (isAxiosError(error) && error.response) {
       core.error(
-        "Subscription is not valid. Reach out to support@stepsecurity.io",
+        "Subscription is not valid. Reach out to support@stepsecurity.io"
       )
       process.exit(1)
     } else {
@@ -24,7 +24,7 @@ async function validateSubscription(): Promise<void> {
 
 export const startServer = async (
   port: number,
-  masterName?: string,
+  masterName?: string
 ): Promise<string> => {
   await validateSubscription()
   const name = generate({ length: 5, charset: "alphanumeric" })
@@ -39,8 +39,8 @@ export const startServer = async (
         "--cluster",
         `nats://0.0.0.0:6222`,
         "--routes",
-        `nats://ruser:T0pS3cr3t@${masterName}:6222`,
-      ],
+        `nats://ruser:T0pS3cr3t@${masterName}:6222`
+      ]
     )
   options = ["docker", "run"].concat(options)
   return exec("sudo", options).then(code => {
