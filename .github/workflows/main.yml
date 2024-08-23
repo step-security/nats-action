@@ -15,7 +15,7 @@ jobs:
           egress-policy: audit
 
       - name: Create Nats server
-        uses: step-security/nats-action@abe50a6cb93763821d7bea2fda868df278abb104 # main
+        uses: step-security/nats-action@4055353d52d7d96f1d42ace5648aa0c0f67cfcea # main
         with:
           port: "4222 4223 4224"
 
