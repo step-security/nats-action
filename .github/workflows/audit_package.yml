@@ -7,13 +7,29 @@ on:
         description: "Specify a base branch"
         required: false
         default: "main"
+      package_manager:
+        description: "Specify package manager (npm or yarn)"
+        required: false
+        default: "yarn"
+      script:
+        description: "Specify the build script to run"
+        required: false
+        type: string
+        default: "yarn build"        
+
+  schedule:
+    - cron: "0 0 * * 1"
 
 jobs:
   audit-fix:
-    uses: step-security/reusable-workflows/.github/workflows/yarn_audit_fix.yml@v1
+    uses: step-security/reusable-workflows/.github/workflows/audit_fix.yml@v1
     with:
-      base_branch: ${{ inputs.base_branch }}
+      base_branch: ${{ github.event.inputs.base_branch || 'main' }}
+      package_manager: "yarn"
+      script: ${{ github.event.inputs.script || 'yarn build' }}
 
 permissions:
   contents: write
   pull-requests: write
+  packages: read
+  issues: write
