@@ -8,18 +8,17 @@
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.createNetwork = void 0;
-const tslib_1 = __nccwpck_require__(4351);
 const exec_1 = __nccwpck_require__(1514);
 const randomstring_1 = __nccwpck_require__(5581);
 let network;
-const createNetwork = () => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+const createNetwork = async () => {
     if (!network) {
         network = (0, randomstring_1.generate)({ length: 10, charset: "alphanumeric" });
-        if ((yield (0, exec_1.exec)("sudo", `docker network create ${network}`.split(" "))) !== 0)
+        if ((await (0, exec_1.exec)("sudo", `docker network create ${network}`.split(" "))) !== 0)
             throw new Error(`creation of network ${network} failed`);
     }
     return network;
-});
+};
 exports.createNetwork = createNetwork;
 //# sourceMappingURL=createNetwork.js.map
 
@@ -37,29 +36,47 @@ const randomstring_1 = __nccwpck_require__(5581);
 const exec_1 = __nccwpck_require__(1514);
 const createNetwork_1 = __nccwpck_require__(7590);
 const core = tslib_1.__importStar(__nccwpck_require__(2186));
+const fs = tslib_1.__importStar(__nccwpck_require__(7147));
 const axios_1 = tslib_1.__importStar(__nccwpck_require__(6321));
-function validateSubscription() {
-    var _a;
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        const API_URL = `https://agent.api.stepsecurity.io/v1/github/${process.env.GITHUB_REPOSITORY}/actions/subscription`;
-        try {
-            yield axios_1.default.get(API_URL, { timeout: 3000 });
+async function validateSubscription() {
+    const eventPath = process.env.GITHUB_EVENT_PATH;
+    let repoPrivate;
+    if (eventPath && fs.existsSync(eventPath)) {
+        const eventData = JSON.parse(fs.readFileSync(eventPath, 'utf8'));
+        repoPrivate = eventData?.repository?.private;
+    }
+    const upstream = 'onichandame/nats-action';
+    const action = process.env.GITHUB_ACTION_REPOSITORY;
+    const docsUrl = 'https://docs.stepsecurity.io/actions/stepsecurity-maintained-actions';
+    core.info('');
+    core.info('\u001b[1;36mStepSecurity Maintained Action\u001b[0m');
+    core.info(`Secure drop-in replacement for ${upstream}`);
+    if (repoPrivate === false)
+        core.info('\u001b[32m\u2713 Free for public repositories\u001b[0m');
+    core.info(`\u001b[36mLearn more:\u001b[0m ${docsUrl}`);
+    core.info('');
+    if (repoPrivate === false)
+        return;
+    const serverUrl = process.env.GITHUB_SERVER_URL || 'https://github.com';
+    const body = { action: action || '' };
+    if (serverUrl !== 'https://github.com')
+        body.ghes_server = serverUrl;
+    try {
+        await axios_1.default.post(`https://agent.api.stepsecurity.io/v1/github/${process.env.GITHUB_REPOSITORY}/actions/maintained-actions-subscription`, body, { timeout: 3000 });
+    }
+    catch (error) {
+        if ((0, axios_1.isAxiosError)(error) && error.response?.status === 403) {
+            core.error(`\u001b[1;31mThis action requires a StepSecurity subscription for private repositories.\u001b[0m`);
+            core.error(`\u001b[31mLearn how to enable a subscription: ${docsUrl}\u001b[0m`);
+            process.exit(1);
         }
-        catch (error) {
-            if ((0, axios_1.isAxiosError)(error) && ((_a = error.response) === null || _a === void 0 ? void 0 : _a.status) === 403) {
-                core.error("Subscription is not valid. Reach out to support@stepsecurity.io");
-                process.exit(1);
-            }
-            else {
-                core.info("Timeout or API not reachable. Continuing to next step.");
-            }
-        }
-    });
+        core.info('Timeout or API not reachable. Continuing to next step.');
+    }
 }
-const startServer = (port, masterName) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
-    yield validateSubscription();
+const startServer = async (port, masterName) => {
+    await validateSubscription();
     const name = (0, randomstring_1.generate)({ length: 5, charset: "alphanumeric" });
-    const network = yield (0, createNetwork_1.createNetwork)();
+    const network = await (0, createNetwork_1.createNetwork)();
     let options = [];
     options.push(...["-d", "--network", network, "-p", `${port}:4222`]);
     if (name)
@@ -79,7 +96,7 @@ const startServer = (port, masterName) => tslib_1.__awaiter(void 0, void 0, void
         else
             throw new Error(`failed to start server ${options.join(" ")}`);
     });
-});
+};
 exports.startServer = startServer;
 //# sourceMappingURL=startServer.js.map
 
@@ -42911,7 +42928,6 @@ var __webpack_exports__ = {};
 var exports = __webpack_exports__;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const tslib_1 = __nccwpck_require__(4351);
 const core_1 = __nccwpck_require__(2186);
 const startServer_1 = __nccwpck_require__(9764);
 let usedPorts = [];
@@ -42925,22 +42941,22 @@ const parsePorts = () => {
 };
 const ports = parsePorts();
 usedPorts = usedPorts.concat(ports);
-(() => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+(async () => {
     try {
         if (!ports.length) {
             (0, core_1.setFailed)(`Require at least 1 port!`);
             return;
         }
         (0, core_1.info)(`Ports ${ports.join(", ")} will be used`);
-        const master = yield (0, startServer_1.startServer)(ports.shift());
-        yield Promise.all(ports.map(p => (0, startServer_1.startServer)(p, master)));
+        const master = await (0, startServer_1.startServer)(ports.shift());
+        await Promise.all(ports.map(p => (0, startServer_1.startServer)(p, master)));
     }
     catch (e) {
         (0, core_1.setFailed)(JSON.stringify(e instanceof Error ? e.message : e));
     }
     // see https://github.com/ruby/setup-ruby/issues/543
     process.exit();
-}))();
+})();
 //# sourceMappingURL=index.js.map
 })();
 
