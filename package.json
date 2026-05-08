@@ -29,11 +29,11 @@
     "@vercel/ncc": "^0.38.1",
     "axios": "^1.7.4",
     "husky": "^4.2.5",
-    "prettier-eslint": "9.0.1",
+    "tslib": "^2.8.1",
     "typescript": "^4.9.4"
   },
   "dependencies": {
-    "@actions/core": "^1.2.4",
+    "@actions/core": "^2.0.0",
     "@actions/exec": "^1.0.4",
     "randomstring": "^1.1.5"
   }

@@ -6,7 +6,7 @@
     "outDir": "lib",
     "target": "ES6",
     "module": "CommonJS",
-    "lib": ["ES6"],
+    "lib": ["ES6", "DOM"],
     "strict": true,
     "noImplicitAny": true,
     "importHelpers": true,
